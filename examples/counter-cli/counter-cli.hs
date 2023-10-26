@@ -21,7 +21,10 @@ main = do
     reader = tvarEventStoreReader tvar
   forever (readAndHandleCommand writer reader)
 
-readAndHandleCommand :: VersionedEventStoreWriter STM CounterEvent -> VersionedEventStoreReader STM CounterEvent -> IO ()
+readAndHandleCommand 
+  :: VersionedEventStoreWriter STM CounterEvent 
+  -> VersionedEventStoreReader STM CounterEvent 
+  -> IO ()
 readAndHandleCommand writer reader = do
   -- Just use the nil uuid for everything
   let uuid = nil

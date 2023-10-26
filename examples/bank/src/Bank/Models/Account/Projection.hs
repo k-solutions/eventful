@@ -1,6 +1,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Bank.Models.Account.Projection
   ( Account (..)
@@ -17,32 +18,34 @@ import Control.Lens
 import Data.Aeson.TH
 import Data.List (delete, find)
 import SumTypes.TH
+import GHC.Generics
 
 import Eventful
 
 import Bank.Models.Account.Events
 import Bank.Json
 
-data Account
-  = Account
-  { _accountBalance :: Double
-  , _accountOwner :: Maybe UUID
-  , _accountPendingTransfers :: [PendingAccountTransfer]
-  } deriving (Show, Eq)
-
-accountDefault :: Account
-accountDefault = Account 0 Nothing []
-
 data PendingAccountTransfer
   = PendingAccountTransfer
   { pendingAccountTransferId :: UUID
   , pendingAccountTransferAmount :: Double
   , pendingAccountTransferTargetAccount :: UUID
-  } deriving (Show, Eq)
+  } deriving (Show, Eq, Generic)
+
+deriveJSON (unPrefixLower "pendingAccountTransfer") ''PendingAccountTransfer
+
+data Account
+  = Account
+  { _accountBalance :: Double
+  , _accountOwner :: Maybe UUID
+  , _accountPendingTransfers :: [PendingAccountTransfer]
+  } deriving (Show, Eq, Generic)
 
 makeLenses ''Account
 deriveJSON (unPrefixLower "_account") ''Account
-deriveJSON (unPrefixLower "pendingAccountTransfer") ''PendingAccountTransfer
+
+accountDefault :: Account
+accountDefault = Account 0 Nothing []
 
 -- | Account balance minus pending balance
 accountAvailableBalance :: Account -> Double
