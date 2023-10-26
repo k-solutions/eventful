@@ -10,7 +10,9 @@ import Data.Aeson
 import qualified Data.HashMap.Strict as HM
 import qualified Data.Text as T
 import qualified Data.Vector as V
-import Network.AWS.DynamoDB hiding (Null)
+import Amazonka.DynamoDB as DynamoDB  ---  hiding (Null)
+import Amazonka.DynamoDB.Lens as DynLens  
+import qualified Amazonka.DynamoDB.Lens as DynLens
 
 -- | Note, currently we can't properly disambiguate between an empty Object or
 -- an empty Array because of amazonka's 'AttributeValue' lenses. We use a very
@@ -18,7 +20,9 @@ import Network.AWS.DynamoDB hiding (Null)
 -- special value. Follow this issue to see when we can remove the kludge:
 -- https://github.com/brendanhay/amazonka/issues/282.
 valueToAttributeValue :: Value -> AttributeValue
-valueToAttributeValue (String v) = attributeValue & avS ?~ v
+valueToAttributeValue (String v) 
+  = DynamoDB.newAttributeValueUpdate 
+  & DynLens.attributeValueUpdate_value ?~ v
 valueToAttributeValue (Number v) = attributeValue & avN ?~ T.pack (show v)
 valueToAttributeValue (Bool v) = attributeValue & avBOOL ?~ v
 valueToAttributeValue (Array vs) = attributeValue & avL .~ fmap valueToAttributeValue (V.toList vs)

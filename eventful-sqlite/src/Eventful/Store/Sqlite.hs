@@ -23,7 +23,7 @@ import Eventful.Store.Sql
 -- | An 'EventStoreWriter' that uses an SQLite database as a backend. Use
 -- 'SqlEventStoreConfig' to configure this event store.
 sqliteEventStoreWriter
-  :: (MonadIO m, PersistEntity entity, PersistEntityBackend entity ~ SqlBackend)
+  :: (MonadIO m, PersistEntity entity, SafeToInsert entity, PersistEntityBackend entity ~ SqlBackend)
   => SqlEventStoreConfig entity serialized
   -> VersionedEventStoreWriter (SqlPersistT m) serialized
 sqliteEventStoreWriter config = EventStoreWriter $ transactionalExpectedWriteHelper getLatestVersion storeEvents'
@@ -31,8 +31,8 @@ sqliteEventStoreWriter config = EventStoreWriter $ transactionalExpectedWriteHel
     getLatestVersion = sqlMaxEventVersion config maxSqliteVersionSql
     storeEvents' = sqlStoreEvents config Nothing maxSqliteVersionSql
 
-maxSqliteVersionSql :: DBName -> DBName -> DBName -> Text
-maxSqliteVersionSql (DBName tableName) (DBName uuidFieldName) (DBName versionFieldName) =
+maxSqliteVersionSql :: EntityNameDB -> FieldNameDB -> FieldNameDB -> Text
+maxSqliteVersionSql (EntityNameDB tableName) (FieldNameDB uuidFieldName) (FieldNameDB versionFieldName) =
   "SELECT IFNULL(MAX(" <> versionFieldName <> "), -1) FROM " <> tableName <> " WHERE " <> uuidFieldName <> " = ?"
 
 -- | This functions runs the migrations required to create the events table and
@@ -48,8 +48,8 @@ initializeSqliteEventStore SqlEventStoreConfig{..} pool = do
 
   -- Create index on uuid field so retrieval is very fast
   let
-    (DBName tableName) = tableDBName (sqlEventStoreConfigSequenceMakeEntity undefined undefined undefined)
-    (DBName uuidFieldName) = fieldDBName sqlEventStoreConfigSequenceNumberField
+    (EntityNameDB tableName) = tableDBName (sqlEventStoreConfigSequenceMakeEntity undefined undefined undefined)
+    (FieldNameDB uuidFieldName) = fieldDBName sqlEventStoreConfigSequenceNumberField
     indexSql =
       "CREATE INDEX IF NOT EXISTS " <>
       uuidFieldName <> "_index" <>

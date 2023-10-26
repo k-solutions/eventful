@@ -21,7 +21,7 @@ import Eventful.Store.Sql
 -- | An 'EventStore' that uses a PostgreSQL database as a backend. Use
 -- 'SqlEventStoreConfig' to configure this event store.
 postgresqlEventStoreWriter
-  :: (MonadIO m, PersistEntity entity, PersistEntityBackend entity ~ SqlBackend)
+  :: (MonadIO m, PersistEntity entity, SafeToInsert entity, PersistEntityBackend entity ~ SqlBackend)
   => SqlEventStoreConfig entity serialized
   -> VersionedEventStoreWriter (SqlPersistT m) serialized
 postgresqlEventStoreWriter config = EventStoreWriter $ transactionalExpectedWriteHelper getLatestVersion storeEvents'
@@ -29,8 +29,8 @@ postgresqlEventStoreWriter config = EventStoreWriter $ transactionalExpectedWrit
     getLatestVersion = sqlMaxEventVersion config maxPostgresVersionSql
     storeEvents' = sqlStoreEvents config (Just tableLockFunc) maxPostgresVersionSql
 
-maxPostgresVersionSql :: DBName -> DBName -> DBName -> Text
-maxPostgresVersionSql (DBName tableName) (DBName uuidFieldName) (DBName versionFieldName) =
+maxPostgresVersionSql :: EntityNameDB -> FieldNameDB -> FieldNameDB -> Text
+maxPostgresVersionSql (EntityNameDB tableName) (FieldNameDB uuidFieldName) (FieldNameDB versionFieldName) =
   "SELECT COALESCE(MAX(" <> versionFieldName <> "), -1) FROM " <> tableName <> " WHERE " <> uuidFieldName <> " = ?"
 
 -- | We need to lock the events table or else our global sequence number might

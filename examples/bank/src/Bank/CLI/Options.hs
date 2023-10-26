@@ -114,4 +114,4 @@ parseTransfer =
   )
 
 parseUUID :: ReadM UUID
-parseUUID = maybe (readerError "Could not parse UUID") return . uuidFromText =<< (T.pack <$> str)
+parseUUID = maybe (readerError "Could not parse UUID") pure . uuidFromText . T.pack =<< str

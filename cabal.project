@@ -1,0 +1,17 @@
+packages: doc/tutorial/tutorial-counter.cabal
+          eventful-core/eventful-core.cabal
+          eventful-memory/eventful-memory.cabal
+          eventful-sql-common/eventful-sql-common.cabal 
+          eventful-sqlite/eventful-sqlite.cabal
+          eventful-postgresql/eventful-postgresql.cabal
+          -- eventful-dynamodb/eventful-dynamodb.cabal
+          eventful-test-helpers/eventful-test-helpers.cabal
+          examples/bank/examples-bank.cabal
+          examples/counter-cli/examples-counter-cli.cabal
+          -- examples/cafe/examples-cafe.cabal
+             
+-- with-compiler: /nix/store/dwiz41hs4pi3fb6hwvval36143nvd2kq-ghc-9.0.2/bin/ghc 
+
+package eventful 
+  optimization: False
+  tests: True

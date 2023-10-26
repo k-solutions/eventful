@@ -3,6 +3,13 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE FlexibleInstances  #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 -- | Definition for a default Entity to use with a SQL event store.
 
@@ -26,7 +33,7 @@ share [mkPersist sqlSettings, mkMigrate "migrateSqlEvent"] [persistLowerCase|
 SqlEvent sql=events
     Id SequenceNumber sql=sequence_number
     uuid UUID
-    version EventVersion
+    version EventVersion 
     event JSONString
     UniqueUuidVersion uuid version
     deriving Show
